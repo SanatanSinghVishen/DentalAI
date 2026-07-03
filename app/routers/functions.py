@@ -22,13 +22,14 @@ _booking_cache = {}
 
 @router.post("/check-availability", response_model=CheckAvailabilityResponse)
 async def check_availability(request: CheckAvailabilityRequest):
-    existing_bookings = get_bookings_for_date(request.date)
+    args = request.args
+    existing_bookings = get_bookings_for_date(args.date)
     
-    available = is_slot_available(existing_bookings, request.date, request.time)
+    available = is_slot_available(existing_bookings, args.date, args.time)
     alternatives = []
     
     if not available:
-        alternatives = suggest_alternatives(existing_bookings, request.date)
+        alternatives = suggest_alternatives(existing_bookings, args.date)
         
     return CheckAvailabilityResponse(
         available=available,
@@ -37,7 +38,9 @@ async def check_availability(request: CheckAvailabilityRequest):
 
 @router.post("/book-appointment", response_model=BookAppointmentResponse)
 async def book_appointment(request: BookAppointmentRequest):
-    idempotency_key = f"{request.call_id}:book_appointment"
+    args = request.args
+    call_id = request.call.get("call_id", "unknown")
+    idempotency_key = f"{call_id}:book_appointment"
     
     if already_processed(idempotency_key):
         # Return cached result if this is a retry
@@ -50,14 +53,14 @@ async def book_appointment(request: BookAppointmentRequest):
     row_data = {
         "timestamp": timestamp,
         "booking_id": booking_id,
-        "name": request.name,
-        "phone": request.phone,
-        "service": request.service,
-        "date": request.date,
-        "time": request.time,
+        "name": args.name,
+        "phone": args.phone,
+        "service": args.service,
+        "date": args.date,
+        "time": args.time,
         "status": "confirmed",
-        "is_emergency": request.is_emergency,
-        "call_id": request.call_id
+        "is_emergency": args.is_emergency,
+        "call_id": call_id
     }
     
     try:
@@ -74,14 +77,16 @@ async def book_appointment(request: BookAppointmentRequest):
 
 @router.post("/log-callback-request", response_model=LogCallbackResponse)
 async def log_callback_request(request: LogCallbackRequest):
+    args = request.args
+    call_id = request.call.get("call_id", "unknown")
     timestamp = datetime.now(timezone.utc).isoformat()
     
     row_data = {
         "timestamp": timestamp,
-        "name": request.name,
-        "phone": request.phone,
-        "reason": request.reason,
-        "call_id": request.call_id
+        "name": args.name,
+        "phone": args.phone,
+        "reason": args.reason,
+        "call_id": call_id
     }
     
     try:
