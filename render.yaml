@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: quensultingai-voice-agent
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: RETELL_API_KEY
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: GOOGLE_SHEET_ID
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CLINIC_NOTIFY_EMAIL
+        sync: false
+      - key: CLINIC_FROM_EMAIL
+        value: onboarding@resend.dev
+      - key: ENV
+        value: production
