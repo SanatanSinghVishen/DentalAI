@@ -1,13 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional, Literal, Dict, Any
 
-Service = Literal[
-    "Dental Cleaning", "Root Canal Treatment", "Teeth Whitening",
-    "Braces Consultation", "Tooth Extraction", "General Dental Consultation",
-]
-
 class CheckAvailabilityArgs(BaseModel):
-    service: Service
+    service: str
     date: str   # YYYY-MM-DD
     time: str   # HH:MM, 24-hour
 
@@ -21,7 +16,7 @@ class CheckAvailabilityResponse(BaseModel):
 class BookAppointmentArgs(BaseModel):
     name: str
     phone: str
-    service: Service
+    service: str
     date: str
     time: str
     email: Optional[str] = None
