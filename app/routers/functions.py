@@ -60,7 +60,7 @@ async def book_appointment(request: BookAppointmentRequest):
         "date": args.date,
         "time": args.time,
         "status": "confirmed",
-        "is_emergency": args.is_emergency,
+        "is_emergency": args.is_emergency or False,
         "call_id": call_id
     }
     

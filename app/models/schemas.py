@@ -20,7 +20,7 @@ class BookAppointmentArgs(BaseModel):
     date: str
     time: str
     email: Optional[str] = None
-    is_emergency: bool = False
+    is_emergency: Optional[bool] = False
 
 class BookAppointmentRequest(BaseModel):
     call: Dict[str, Any]
