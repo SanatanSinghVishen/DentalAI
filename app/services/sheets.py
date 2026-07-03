@@ -35,6 +35,7 @@ def append_booking(row: dict):
             row.get("booking_id", ""),
             row.get("name", ""),
             row.get("phone", ""),
+            row.get("email", ""),
             row.get("service", ""),
             row.get("date", ""),
             row.get("time", ""),

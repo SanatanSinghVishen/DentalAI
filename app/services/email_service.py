@@ -11,17 +11,23 @@ async def send_internal_notification(booking: dict):
 
     try:
         async with httpx.AsyncClient() as client:
+            recipients = [settings.CLINIC_NOTIFY_EMAIL]
+            if booking.get("email"):
+                recipients.append(booking["email"])
+                
             response = await client.post(
                 "https://api.resend.com/emails",
                 headers={"Authorization": f"Bearer {settings.RESEND_API_KEY}"},
                 json={
                     "from": settings.CLINIC_FROM_EMAIL,
-                    "to": settings.CLINIC_NOTIFY_EMAIL,
-                    "subject": f"New booking: {booking['name']} - {booking['service']}",
+                    "to": recipients,
+                    "subject": f"Appointment Confirmed: {booking['name']} - {booking['service']}",
                     "html": (
-                        f"<p>{booking['name']} booked <strong>{booking['service']}</strong> on "
-                        f"{booking['date']} at {booking['time']}.<br>"
-                        f"Phone: {booking['phone']}</p>"
+                        f"<p>Hello {booking['name']},</p>"
+                        f"<p>Your appointment for <strong>{booking['service']}</strong> is confirmed on "
+                        f"{booking['date']} at {booking['time']}.</p>"
+                        f"<p>We will reach you at {booking['phone']} if needed.</p>"
+                        f"<p>Thank you,<br>QuensultingAI Dental Clinic</p>"
                     ),
                 },
             )

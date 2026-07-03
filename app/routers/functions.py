@@ -55,6 +55,7 @@ async def book_appointment(request: BookAppointmentRequest):
         "booking_id": booking_id,
         "name": args.name,
         "phone": args.phone,
+        "email": args.email,
         "service": args.service,
         "date": args.date,
         "time": args.time,
