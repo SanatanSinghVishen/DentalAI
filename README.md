@@ -1,4 +1,4 @@
-# QuensultingAI Dental Receptionist 🦷🎙️
+#Dental Receptionist 🦷🎙️
 
 An intelligent, ultra-low latency voice AI receptionist built for dental clinics. This agent handles incoming phone calls, answers FAQs using a RAG-based knowledge base, checks real-time slot availability, books appointments, and gracefully handles emergencies by transferring calls to human staff.
 
