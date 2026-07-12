@@ -18,6 +18,10 @@ app.add_middleware(
 
 app.include_router(functions.router, prefix="/functions", tags=["Functions"])
 
-@app.get("/health")
+@app.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     return {"status": "healthy"}
+
+@app.get("/ping")
+async def ping():
+    return "pong"
