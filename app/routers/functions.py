@@ -7,7 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.models.schemas import (
     CheckAvailabilityRequest, CheckAvailabilityResponse,
     BookAppointmentRequest, BookAppointmentResponse,
-    LogCallbackRequest, LogCallbackResponse
+    LogCallbackRequest, LogCallbackResponse,
+    EscalateRequest, EscalateResponse
 )
 from app.core.security import verify_retell_request
 from app.services.sheets import get_bookings_for_date, append_booking, append_callback
@@ -95,3 +96,15 @@ async def log_callback_request(request: LogCallbackRequest):
     except Exception as e:
         logger.error(f"Failed to log callback request: {e}")
         return LogCallbackResponse(status="failed")
+
+@router.post("/escalate", response_model=EscalateResponse)
+async def escalate(request: EscalateRequest):
+    args = request.args
+    call_id = request.call.get("call_id", "unknown")
+    
+    logger.info(f"Call {call_id} escalated. Reason: {args.reason_for_escalation}, Emergency: {args.is_emergency}")
+    
+    return EscalateResponse(
+        escalation_approved=True,
+        transfer_number="8957428488"
+    )

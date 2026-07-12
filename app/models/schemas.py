@@ -52,3 +52,15 @@ class LogCallbackRequest(BaseModel):
 
 class LogCallbackResponse(BaseModel):
     status: Literal["logged", "failed"]
+
+class EscalateArgs(BaseModel):
+    reason_for_escalation: str
+    is_emergency: bool
+
+class EscalateRequest(BaseModel):
+    call: Dict[str, Any]
+    args: EscalateArgs
+
+class EscalateResponse(BaseModel):
+    escalation_approved: bool = True
+    transfer_number: str = "8957428488"

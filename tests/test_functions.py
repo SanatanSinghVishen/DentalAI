@@ -118,4 +118,35 @@ def test_check_availability_endpoint():
         finally:
             app.dependency_overrides.clear()
 
+def test_escalate_endpoint():
+    from fastapi.testclient import TestClient
+    from fastapi import Request
+    from app.main import app
+    from app.core.security import verify_retell_request
+    
+    async def mock_verify_retell_request(request: Request):
+        return await request.json()
+        
+    app.dependency_overrides[verify_retell_request] = mock_verify_retell_request
+    
+    try:
+        client = TestClient(app)
+        
+        response = client.post(
+            "/functions/escalate",
+            json={
+                "call": {"call_id": "call_999"},
+                "args": {
+                    "reason_for_escalation": "Patient reports severe bleeding after wisdom tooth extraction",
+                    "is_emergency": True
+                }
+            }
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["escalation_approved"] is True
+        assert data["transfer_number"] == "8957428488"
+    finally:
+        app.dependency_overrides.clear()
+
 
