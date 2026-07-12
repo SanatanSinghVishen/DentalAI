@@ -59,3 +59,24 @@ def normalize_service(service: str) -> str:
         return "General Dental Consultation"
     return service.strip().title()
 
+def clean_email(email: str | None) -> str | None:
+    if not email:
+        return None
+        
+    s = email.lower().strip()
+    
+    # Replace common verbalizations
+    s = s.replace("at the rate", "@")
+    
+    # Replace "at" if "@" is not already present
+    if "@" not in s:
+        s = s.replace(" at ", "@")
+        
+    # Replace "dot" with "."
+    s = s.replace("dot", ".")
+    
+    # Remove all whitespace (since emails don't contain spaces)
+    s = "".join(s.split())
+    
+    return s
+

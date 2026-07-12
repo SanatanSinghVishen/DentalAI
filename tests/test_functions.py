@@ -207,4 +207,15 @@ def test_log_callback_endpoint_validation():
         finally:
             app.dependency_overrides.clear()
 
+def test_clean_email():
+    from app.services.availability import clean_email
+    
+    assert clean_email("john at the rate gmail.com") == "john@gmail.com"
+    assert clean_email("john at gmail dot com") == "john@gmail.com"
+    assert clean_email("j o h n @ g m a i l . c o m") == "john@gmail.com"
+    assert clean_email("john.doe at the rate gmail dot com") == "john.doe@gmail.com"
+    assert clean_email("  john.smith@gmail.com  ") == "john.smith@gmail.com"
+    assert clean_email(None) is None
+    assert clean_email("") is None
+
 
