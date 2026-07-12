@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 import httpx
 import logging
 from app.core.config import settings
@@ -34,4 +35,3 @@ async def send_internal_notification(booking: dict):
             response.raise_for_status()
     except Exception as e:
         logger.error(f"Failed to send email notification: {e}")
-        # Note: We don't raise here because we don't want an email failure to cancel a successful booking.

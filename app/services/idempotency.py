@@ -7,5 +7,4 @@ def already_processed(key: str) -> bool:
     return False
 
 def clear_cache():
-    # For testing purposes
     _seen.clear()

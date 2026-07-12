@@ -27,7 +27,6 @@ def get_sheet_by_name(sheet_name: str) -> gspread.Worksheet:
     return client.open_by_key(settings.GOOGLE_SHEET_ID).worksheet(sheet_name)
 
 def append_booking(row: dict):
-    # timestamp | booking_id | name | phone | service | date | time | status | is_emergency | call_id
     try:
         sheet = get_sheet_by_name("Bookings")
         sheet.append_row([
@@ -50,7 +49,6 @@ def append_booking(row: dict):
 def get_bookings_for_date(date: str) -> List[Dict]:
     try:
         if not settings.GOOGLE_SERVICE_ACCOUNT_JSON or not settings.GOOGLE_SHEET_ID:
-            # For local tests without credentials
             return []
             
         sheet = get_sheet_by_name("Bookings")
@@ -58,11 +56,9 @@ def get_bookings_for_date(date: str) -> List[Dict]:
         return [r for r in all_records if str(r.get("date", "")) == date]
     except Exception as e:
         logger.error(f"Failed to fetch bookings for date {date}: {e}")
-        # Return empty list on failure rather than breaking the bot
         return []
 
 def append_callback(row: dict):
-    # timestamp | name | phone | reason | call_id
     try:
         sheet = get_sheet_by_name("Callbacks")
         sheet.append_row([

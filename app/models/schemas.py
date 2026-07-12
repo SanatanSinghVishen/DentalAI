@@ -13,9 +13,9 @@ ServiceType = Literal[
 ]
 
 class CheckAvailabilityArgs(BaseModel):
-    service: ServiceType
     date: str   # YYYY-MM-DD
     time: str   # HH:MM, 24-hour
+    service: Optional[str] = None
 
 class CheckAvailabilityRequest(BaseModel):
     args: CheckAvailabilityArgs

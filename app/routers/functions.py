@@ -18,7 +18,6 @@ from app.services.email_service import send_internal_notification
 router = APIRouter(dependencies=[Depends(verify_retell_request)])
 logger = logging.getLogger(__name__)
 
-# Basic memory cache for duplicated testing, usually you'd store this in a DB or Redis
 _booking_cache = {}
 
 @router.post("/check-availability", response_model=CheckAvailabilityResponse)
@@ -44,7 +43,6 @@ async def book_appointment(request: BookAppointmentRequest):
     idempotency_key = f"{call_id}:book_appointment"
     
     if already_processed(idempotency_key):
-        # Return cached result if this is a retry
         if idempotency_key in _booking_cache:
             return _booking_cache[idempotency_key]
             
