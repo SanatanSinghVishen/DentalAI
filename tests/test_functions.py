@@ -123,30 +123,73 @@ def test_escalate_endpoint():
     from fastapi import Request
     from app.main import app
     from app.core.security import verify_retell_request
+    from unittest.mock import patch
     
     async def mock_verify_retell_request(request: Request):
         return await request.json()
         
     app.dependency_overrides[verify_retell_request] = mock_verify_retell_request
     
-    try:
-        client = TestClient(app)
-        
-        response = client.post(
-            "/functions/escalate",
-            json={
-                "call": {"call_id": "call_999"},
-                "args": {
-                    "reason_for_escalation": "Patient reports severe bleeding after wisdom tooth extraction",
-                    "is_emergency": True
+    with patch("app.routers.functions.append_callback") as mock_append_callback:
+        try:
+            client = TestClient(app)
+            
+            response = client.post(
+                "/functions/escalate",
+                json={
+                    "call": {"call_id": "call_999", "from_number": "+12223334444"},
+                    "args": {
+                        "reason_for_escalation": "Patient reports severe bleeding after wisdom tooth extraction",
+                        "is_emergency": True
+                    }
                 }
-            }
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["escalation_approved"] is True
-        assert data["transfer_number"] == "8957428488"
-    finally:
-        app.dependency_overrides.clear()
+            )
+            assert response.status_code == 200
+            data = response.json()
+            assert data["escalation_approved"] is True
+            assert data["transfer_number"] == "8957428488"
+            
+            mock_append_callback.assert_called_once()
+            called_row = mock_append_callback.call_args[0][0]
+            assert called_row["phone"] == "+12223334444"
+            assert "Patient reports severe bleeding" in called_row["reason"]
+        finally:
+            app.dependency_overrides.clear()
+
+def test_log_callback_endpoint_fallback():
+    from fastapi.testclient import TestClient
+    from fastapi import Request
+    from app.main import app
+    from app.core.security import verify_retell_request
+    from unittest.mock import patch
+    
+    async def mock_verify_retell_request(request: Request):
+        return await request.json()
+        
+    app.dependency_overrides[verify_retell_request] = mock_verify_retell_request
+    
+    with patch("app.routers.functions.append_callback") as mock_append_callback:
+        try:
+            client = TestClient(app)
+            
+            response = client.post(
+                "/functions/log-callback-request",
+                json={
+                    "call": {"call_id": "call_888", "from_number": "+19998887777"},
+                    "args": {
+                        "reason": "Request callback for emergency pain relief"
+                    }
+                }
+            )
+            assert response.status_code == 200
+            assert response.json()["status"] == "logged"
+            
+            mock_append_callback.assert_called_once()
+            called_row = mock_append_callback.call_args[0][0]
+            assert called_row["name"] == "Emergency Caller"
+            assert called_row["phone"] == "+19998887777"
+            assert called_row["reason"] == "Request callback for emergency pain relief"
+        finally:
+            app.dependency_overrides.clear()
 
 

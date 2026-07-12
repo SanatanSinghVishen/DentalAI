@@ -82,10 +82,23 @@ async def log_callback_request(request: LogCallbackRequest):
     call_id = request.call.get("call_id", "unknown")
     timestamp = datetime.now(timezone.utc).isoformat()
     
+    # Retrieve phone from args or call metadata
+    phone = args.phone
+    if not phone:
+        phone = (
+            request.call.get("from_number") or 
+            request.call.get("caller_phone_number") or 
+            request.call.get("user_phone_number") or 
+            "unknown"
+        )
+        
+    # Retrieve name or default it
+    name = args.name or "Emergency Caller"
+    
     row_data = {
         "timestamp": timestamp,
-        "name": args.name,
-        "phone": args.phone,
+        "name": name,
+        "phone": phone,
         "reason": args.reason,
         "call_id": call_id
     }
@@ -101,8 +114,31 @@ async def log_callback_request(request: LogCallbackRequest):
 async def escalate(request: EscalateRequest):
     args = request.args
     call_id = request.call.get("call_id", "unknown")
+    timestamp = datetime.now(timezone.utc).isoformat()
+    
+    # Retrieve caller phone number from call details
+    phone = (
+        request.call.get("from_number") or 
+        request.call.get("caller_phone_number") or 
+        request.call.get("user_phone_number") or 
+        "unknown"
+    )
     
     logger.info(f"Call {call_id} escalated. Reason: {args.reason_for_escalation}, Emergency: {args.is_emergency}")
+    
+    # Log the escalation to the Callbacks sheet so front desk has it
+    row_data = {
+        "timestamp": timestamp,
+        "name": "Emergency Caller (Escalated)" if args.is_emergency else "Escalated Caller",
+        "phone": phone,
+        "reason": f"[Escalation] {args.reason_for_escalation}",
+        "call_id": call_id
+    }
+    
+    try:
+        append_callback(row_data)
+    except Exception as e:
+        logger.error(f"Failed to log escalation callback: {e}")
     
     return EscalateResponse(
         escalation_approved=True,
