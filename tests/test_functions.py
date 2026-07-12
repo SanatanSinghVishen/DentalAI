@@ -17,18 +17,31 @@ def test_book_appointment_request_schema():
     )
     assert req.args.service == "Dental Cleaning"
     
-    # Invalid service enum
-    with pytest.raises(ValidationError):
-        BookAppointmentRequest(
-            call={"call_id": "call_123"},
-            args=BookAppointmentArgs(
-                name="John Doe",
-                phone="1234567890",
-                service="Fake Service",
-                date="2023-10-20",
-                time="10:00"
-            )
+    # Fuzzy service names are accepted by the schema
+    req_fuzzy = BookAppointmentRequest(
+        call={"call_id": "call_123"},
+        args=BookAppointmentArgs(
+            name="John Doe",
+            phone="1234567890",
+            service="Root Canal",
+            date="2023-10-20",
+            time="10:00"
         )
+    )
+    assert req_fuzzy.args.service == "Root Canal"
+
+def test_normalize_service():
+    from app.services.availability import normalize_service
+    
+    assert normalize_service("Root Canal") == "Root Canal Treatment"
+    assert normalize_service("root canal") == "Root Canal Treatment"
+    assert normalize_service("cleaning") == "Dental Cleaning"
+    assert normalize_service("dental cleaning") == "Dental Cleaning"
+    assert normalize_service("whitening") == "Teeth Whitening"
+    assert normalize_service("brace") == "Braces Consultation"
+    assert normalize_service("extraction") == "Tooth Extraction"
+    assert normalize_service("general consultation") == "General Dental Consultation"
+    assert normalize_service("Some Random Service") == "Some Random Service"
 
 def test_idempotency_logic():
     clear_cache()

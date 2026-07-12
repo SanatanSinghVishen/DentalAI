@@ -42,3 +42,20 @@ def suggest_alternatives(existing: list[dict], date: str, n: int = 3) -> list[st
                 break
         hour += 1
     return slots
+
+def normalize_service(service: str) -> str:
+    s = service.lower().strip()
+    if "root" in s or "canal" in s:
+        return "Root Canal Treatment"
+    if "cleaning" in s:
+        return "Dental Cleaning"
+    if "whitening" in s:
+        return "Teeth Whitening"
+    if "brace" in s:
+        return "Braces Consultation"
+    if "extract" in s:
+        return "Tooth Extraction"
+    if "consult" in s:
+        return "General Dental Consultation"
+    return service.strip().title()
+

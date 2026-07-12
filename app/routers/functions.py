@@ -11,7 +11,7 @@ from app.models.schemas import (
 )
 from app.core.security import verify_retell_request
 from app.services.sheets import get_bookings_for_date, append_booking, append_callback
-from app.services.availability import is_slot_available, suggest_alternatives
+from app.services.availability import is_slot_available, suggest_alternatives, normalize_service
 from app.services.idempotency import already_processed
 from app.services.email_service import send_internal_notification
 
@@ -55,7 +55,7 @@ async def book_appointment(request: BookAppointmentRequest):
         "name": args.name,
         "phone": args.phone,
         "email": args.email,
-        "service": args.service,
+        "service": normalize_service(args.service),
         "date": args.date,
         "time": args.time,
         "status": "confirmed",

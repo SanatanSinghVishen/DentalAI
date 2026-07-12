@@ -27,7 +27,7 @@ class CheckAvailabilityResponse(BaseModel):
 class BookAppointmentArgs(BaseModel):
     name: str
     phone: str
-    service: ServiceType
+    service: str
     date: str
     time: str
     email: Optional[str] = None
