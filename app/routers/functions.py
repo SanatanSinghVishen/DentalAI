@@ -82,23 +82,10 @@ async def log_callback_request(request: LogCallbackRequest):
     call_id = request.call.get("call_id", "unknown")
     timestamp = datetime.now(timezone.utc).isoformat()
     
-    # Retrieve phone from args or call metadata
-    phone = args.phone
-    if not phone:
-        phone = (
-            request.call.get("from_number") or 
-            request.call.get("caller_phone_number") or 
-            request.call.get("user_phone_number") or 
-            "unknown"
-        )
-        
-    # Retrieve name or default it
-    name = args.name or "Emergency Caller"
-    
     row_data = {
         "timestamp": timestamp,
-        "name": name,
-        "phone": phone,
+        "name": args.name,
+        "phone": args.phone,
         "reason": args.reason,
         "call_id": call_id
     }

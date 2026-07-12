@@ -156,7 +156,7 @@ def test_escalate_endpoint():
         finally:
             app.dependency_overrides.clear()
 
-def test_log_callback_endpoint_fallback():
+def test_log_callback_endpoint_validation():
     from fastapi.testclient import TestClient
     from fastapi import Request
     from app.main import app
@@ -172,7 +172,8 @@ def test_log_callback_endpoint_fallback():
         try:
             client = TestClient(app)
             
-            response = client.post(
+            # 1. Post request missing name and phone in args (should fail with 422)
+            response_invalid = client.post(
                 "/functions/log-callback-request",
                 json={
                     "call": {"call_id": "call_888", "from_number": "+19998887777"},
@@ -181,12 +182,26 @@ def test_log_callback_endpoint_fallback():
                     }
                 }
             )
-            assert response.status_code == 200
-            assert response.json()["status"] == "logged"
+            assert response_invalid.status_code == 422
+            
+            # 2. Post request with required name and phone (should succeed with 200)
+            response_valid = client.post(
+                "/functions/log-callback-request",
+                json={
+                    "call": {"call_id": "call_888", "from_number": "+19998887777"},
+                    "args": {
+                        "name": "Jane Doe",
+                        "phone": "+19998887777",
+                        "reason": "Request callback for emergency pain relief"
+                    }
+                }
+            )
+            assert response_valid.status_code == 200
+            assert response_valid.json()["status"] == "logged"
             
             mock_append_callback.assert_called_once()
             called_row = mock_append_callback.call_args[0][0]
-            assert called_row["name"] == "Emergency Caller"
+            assert called_row["name"] == "Jane Doe"
             assert called_row["phone"] == "+19998887777"
             assert called_row["reason"] == "Request callback for emergency pain relief"
         finally:

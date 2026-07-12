@@ -42,9 +42,9 @@ class BookAppointmentResponse(BaseModel):
     booking_id: Optional[str] = None
 
 class LogCallbackArgs(BaseModel):
+    name: str
+    phone: str
     reason: str
-    name: Optional[str] = None
-    phone: Optional[str] = None
 
 class LogCallbackRequest(BaseModel):
     call: Dict[str, Any]
